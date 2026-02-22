@@ -4,7 +4,7 @@
 - [x] Create repository scaffold
 - [x] Write PRD
 - [x] Write TECH_STACK
-- [ ] Set up Python env + dependencies
+- [x] Set up Python env + dependencies (via Docker image build)
 - [ ] Implement DB models + migrations bootstrap
 
 ## Phase 1 — Core Calendar MVP
@@ -16,9 +16,9 @@
 
 ## Phase 2 — Deploy on VPS (no domain)
 - [ ] Create systemd user service
-- [ ] Run app on `0.0.0.0:3210` (or localhost + reverse later)
-- [ ] Add startup/restart instructions in README
-- [ ] Smoke test from browser
+- [x] Run app on `0.0.0.0:3210` (Docker, restart unless-stopped)
+- [x] Add startup/restart instructions in README
+- [x] Smoke test from browser/health endpoint
 
 ## Phase 3 — OpenClaw Bridge
 - [ ] Add API token auth for write endpoints
