@@ -1,0 +1,7 @@
+services:
+  personal-dashboard:
+    build: .
+    container_name: personal-dashboard
+    ports:
+      - "3210:3210"
+    restart: unless-stopped

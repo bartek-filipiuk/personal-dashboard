@@ -11,3 +11,13 @@ uvicorn app.main:app --host 0.0.0.0 --port 3210
 ```
 
 Open: `http://<server-ip>:3210`
+
+## Run (docker)
+```bash
+docker compose up -d --build
+```
+
+Health:
+```bash
+curl http://127.0.0.1:3210/health
+```
