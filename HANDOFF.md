@@ -5,14 +5,14 @@
 - [x] Write PRD
 - [x] Write TECH_STACK
 - [x] Set up Python env + dependencies (via Docker image build)
-- [ ] Implement DB models + migrations bootstrap
+- [x] Implement DB models + migrations bootstrap
 
 ## Phase 1 — Core Calendar MVP
-- [ ] Implement events CRUD API
-- [ ] Implement quick-add parser (`"Dentysta jutro 14:00"` + ISO datetime)
-- [ ] Build calendar page (month/week) with FullCalendar
-- [ ] Connect frontend to API
-- [ ] Basic validation + error handling
+- [x] Implement events CRUD API
+- [x] Implement quick-add parser (`"Dentysta jutro 14:00"` + ISO datetime)
+- [x] Build calendar page (month/week) with FullCalendar
+- [x] Connect frontend to API
+- [x] Basic validation + error handling
 
 ## Phase 2 — Deploy on VPS (no domain)
 - [ ] Create systemd user service
