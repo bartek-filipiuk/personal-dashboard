@@ -5,7 +5,7 @@ import re
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, create_engine, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
@@ -50,7 +50,21 @@ class EventCreate(BaseModel):
     start: datetime
     end: Optional[datetime] = None
     all_day: bool = False
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=5000)
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("title cannot be empty")
+        return value
+
+    @model_validator(mode="after")
+    def validate_range(self):
+        if self.end and self.end < self.start:
+            raise ValueError("end must be >= start")
+        return self
 
 
 class EventUpdate(BaseModel):
@@ -58,7 +72,17 @@ class EventUpdate(BaseModel):
     start: Optional[datetime] = None
     end: Optional[datetime] = None
     all_day: Optional[bool] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=5000)
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        value = value.strip()
+        if not value:
+            raise ValueError("title cannot be empty")
+        return value
 
 
 class EventOut(BaseModel):
@@ -76,16 +100,26 @@ class EventOut(BaseModel):
 class QuickAddIn(BaseModel):
     text: str
 
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("quick-add text cannot be empty")
+        return value
+
 
 def parse_quick_add(text: str) -> EventCreate:
     text = text.strip()
-    if not text:
-        raise ValueError("Quick-add text cannot be empty")
 
-    # Very small MVP parser:
+    # Supported formats:
     # - "Title YYYY-MM-DD HH:MM"
+    # - "Title YYYY-MM-DDTHH:MM"
     # - "Title jutro HH:MM"
-    m_iso = re.match(r"^(?P<title>.+?)\s+(?P<date>\d{4}-\d{2}-\d{2})\s+(?P<time>\d{1,2}:\d{2})$", text)
+    m_iso = re.match(
+        r"^(?P<title>.+?)\s+(?P<date>\d{4}-\d{2}-\d{2})[T\s](?P<time>\d{1,2}:\d{2})$",
+        text,
+    )
     if m_iso:
         title = m_iso.group("title").strip()
         start = datetime.strptime(f"{m_iso.group('date')} {m_iso.group('time')}", "%Y-%m-%d %H:%M")
@@ -98,7 +132,9 @@ def parse_quick_add(text: str) -> EventCreate:
         start = datetime.combine((datetime.utcnow() + timedelta(days=1)).date(), t)
         return EventCreate(title=title, start=start)
 
-    raise ValueError("Unsupported format. Use: 'Title YYYY-MM-DD HH:MM' or 'Title jutro HH:MM'.")
+    raise ValueError(
+        "unsupported format. Use: 'Title YYYY-MM-DD HH:MM', 'Title YYYY-MM-DDTHH:MM' or 'Title jutro HH:MM'"
+    )
 
 
 @app.get("/health")
@@ -117,11 +153,16 @@ def list_events(db: Session = Depends(get_db)):
     return rows
 
 
-@app.post("/api/events", response_model=EventOut)
-def create_event(payload: EventCreate, db: Session = Depends(get_db)):
-    if payload.end and payload.end < payload.start:
-        raise HTTPException(status_code=400, detail="end must be >= start")
+@app.get("/api/events/{event_id}", response_model=EventOut)
+def get_event(event_id: int, db: Session = Depends(get_db)):
+    ev = db.get(Event, event_id)
+    if not ev:
+        raise HTTPException(status_code=404, detail="event not found")
+    return ev
 
+
+@app.post("/api/events", response_model=EventOut, status_code=201)
+def create_event(payload: EventCreate, db: Session = Depends(get_db)):
     ev = Event(**payload.model_dump())
     db.add(ev)
     db.commit()
@@ -158,7 +199,7 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@app.post("/api/events/quick-add", response_model=EventOut)
+@app.post("/api/events/quick-add", response_model=EventOut, status_code=201)
 def quick_add(payload: QuickAddIn, db: Session = Depends(get_db)):
     try:
         parsed = parse_quick_add(payload.text)
