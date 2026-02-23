@@ -251,6 +251,43 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 760px) {
+      .app { padding: 14px; }
+      .card { padding: 14px; }
+      #calendar { min-height: 420px; }
+
+      .fc .fc-header-toolbar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .fc .fc-toolbar-title {
+        margin: 0;
+        font-size: 1.75rem;
+        line-height: 1.15;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+
+      .fc .fc-button-group {
+        display: inline-flex;
+        flex-wrap: wrap;
+      }
+
+      .fc .fc-button {
+        padding: 0.42em 0.6em;
+      }
+    }
   </style>
 </head>
 <body>
