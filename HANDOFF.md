@@ -25,6 +25,15 @@
 - [x] Define OpenClaw command grammar for quick add
 - [x] Add integration notes for custom skill/tool wrapper
 
+## Phase 5 (Optional) — WOW Polish
+- [x] Modernized layout with typography/spacing scale and card-based sections
+- [x] Added polished dark/light theme toggle with subtle gradients/shadows
+- [x] Added category color chips and improved empty states
+- [x] Added command-bar style quick add (Ctrl/Cmd+K and / shortcut)
+- [x] Added toast notifications + loading/success/error micro-feedback
+- [x] Unified Today + Upcoming 7 days + Calendar on one coherent screen
+- [x] Kept API contract and CRUD/quick-add flows unchanged
+
 ## Definition of Done (MVP)
 - [x] Event can be added via web form
 - [x] Event can be added via text quick-add endpoint
@@ -37,4 +46,5 @@
 2. Phase 1 core API + DB
 3. Phase 1 UI hookup
 4. Phase 2 deploy + smoke test
-5. Update this file with completed checkboxes
+5. Phase 5 optional WOW polish
+6. Update this file with completed checkboxes

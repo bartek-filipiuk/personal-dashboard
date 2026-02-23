@@ -1,113 +1,635 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Personal Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
   <style>
-    body{font-family:Inter,system-ui;margin:24px}
-    #calendar{max-width:1000px;margin-top:20px}
-    form{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
-    input,button{padding:8px}
-    .row{margin-top:14px}
+    :root {
+      --bg: #f4f7fb;
+      --bg-elev: #ffffff;
+      --surface-2: #eef3fb;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --border: #dbe4f3;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --grad: linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #f5f3ff 100%);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --space-1: 6px;
+      --space-2: 10px;
+      --space-3: 14px;
+      --space-4: 18px;
+      --space-5: 24px;
+    }
+
+    body.dark {
+      --bg: #0b1120;
+      --bg-elev: #121b2e;
+      --surface-2: #17243b;
+      --text: #e6edf9;
+      --text-muted: #9fb0cd;
+      --primary: #60a5fa;
+      --primary-2: #3b82f6;
+      --border: #22324d;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      --success: #34d399;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --grad: linear-gradient(135deg, #0f1b33 0%, #17243b 50%, #202645 100%);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-5);
+    }
+
+    .hero {
+      background: var(--grad);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 4vw, 28px);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+
+    .title {
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: clamp(1.45rem, 3vw, 2rem);
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin: var(--space-1) 0 0;
+      font-size: .95rem;
+    }
+
+    .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+
+    button, input {
+      font: inherit;
+      color: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      padding: 10px 12px;
+    }
+
+    button { cursor: pointer; font-weight: 600; }
+    button:hover { border-color: var(--primary); }
+
+    .btn-primary {
+      border-color: transparent;
+      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+      color: white;
+    }
+
+    .btn-ghost { background: transparent; }
+
+    .shortcut {
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: .88rem;
+    }
+
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: var(--space-2); }
+    .chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 9px; border-radius: 999px; font-size: .8rem; border: 1px solid var(--border); background: var(--bg-elev); }
+    .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    .card {
+      grid-column: span 12;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--space-4);
+      min-width: 0;
+    }
+
+    .card h3 { margin: 0 0 var(--space-3); font-size: 1.1rem; }
+
+    .two-col { display: grid; gap: var(--space-3); }
+
+    @media (min-width: 900px) {
+      .today { grid-column: span 4; }
+      .upcoming { grid-column: span 4; }
+      .quick { grid-column: span 4; }
+      .calendar { grid-column: span 12; }
+      .two-col { grid-template-columns: 1fr auto; align-items: center; }
+    }
+
+    .event-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+    .event-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      background: color-mix(in oklab, var(--bg-elev) 88%, var(--primary) 12%);
+    }
+
+    .event-title { font-weight: 600; }
+    .event-meta { color: var(--text-muted); font-size: .87rem; margin-top: 3px; }
+    .event-actions { margin-top: 8px; display: flex; gap: 8px; }
+    .event-actions button { padding: 6px 9px; font-size: .82rem; }
+
+    .empty {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      color: var(--text-muted);
+      text-align: center;
+      background: var(--surface-2);
+    }
+
+    .stack { display: grid; gap: var(--space-3); }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: .87rem; color: var(--text-muted); }
+    .field input { width: 100%; }
+
+    #calendar { min-height: 540px; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 27, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 30;
+    }
+    .modal.show { display: flex; }
+
+    .modal-card {
+      width: min(780px, 100%);
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .command-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .muted { color: var(--text-muted); font-size: .88rem; }
+
+    .toasts {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      display: grid;
+      gap: 8px;
+      z-index: 40;
+      width: min(92vw, 360px);
+    }
+
+    .toast {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      padding: 10px 12px;
+      box-shadow: var(--shadow);
+      font-size: .9rem;
+    }
+
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+    .toast.info { border-left: 4px solid var(--primary); }
+
+    .loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: .86rem;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 999px;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <h2>Personal Dashboard — Calendar</h2>
-
-  <form id="createForm">
-    <div>
-      <label>Title</label><br/>
-      <input name="title" placeholder="Dentysta" required />
-    </div>
-    <div>
-      <label>Start</label><br/>
-      <input name="start" type="datetime-local" required />
-    </div>
-    <div>
-      <label>End</label><br/>
-      <input name="end" type="datetime-local" />
-    </div>
-    <button type="submit">Add event</button>
-  </form>
-
-  <div class="row">
-    <form id="quickAddForm">
+  <main class="app">
+    <section class="hero">
       <div>
-        <label>Quick add</label><br/>
-        <input name="text" style="min-width:420px" placeholder="Dentysta jutro 14:00 OR Dentysta 2026-02-23 14:00" required />
+        <h1 class="title">Personal Dashboard</h1>
+        <p class="subtitle">A clean command-friendly planner for today, next week, and your full calendar.</p>
+        <div class="chip-row">
+          <span class="chip"><span class="dot" style="background:#3b82f6"></span>Work</span>
+          <span class="chip"><span class="dot" style="background:#10b981"></span>Health</span>
+          <span class="chip"><span class="dot" style="background:#f59e0b"></span>Personal</span>
+        </div>
       </div>
-      <button type="submit">Quick add</button>
-    </form>
+      <div class="toolbar">
+        <button id="themeToggle" class="btn-ghost" title="Toggle dark/light">🌗 Theme</button>
+        <button id="tokenBtn" class="btn-ghost" title="Set API token">🔐 API token</button>
+        <button id="openCmd" class="btn-primary">⌘ Quick Add</button>
+        <span class="shortcut">Ctrl/Cmd + K or /</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card today">
+        <h3>Today</h3>
+        <div id="todayWrap" class="stack"></div>
+      </article>
+
+      <article class="card upcoming">
+        <h3>Upcoming 7 days</h3>
+        <div id="upcomingWrap" class="stack"></div>
+      </article>
+
+      <article class="card quick">
+        <h3>Quick create</h3>
+        <form id="createForm" class="stack">
+          <div class="field">
+            <label>Title</label>
+            <input name="title" placeholder="Dentist" required />
+          </div>
+          <div class="field">
+            <label>Start</label>
+            <input name="start" type="datetime-local" required />
+          </div>
+          <div class="field">
+            <label>End (optional)</label>
+            <input name="end" type="datetime-local" />
+          </div>
+          <button type="submit" class="btn-primary">Add event</button>
+          <div id="createLoading" class="loading" style="display:none"><span class="spinner"></span>Saving...</div>
+        </form>
+      </article>
+
+      <article class="card calendar">
+        <div class="two-col">
+          <h3>Calendar</h3>
+          <p class="muted">Click event to edit/delete</p>
+        </div>
+        <div id="calendar"></div>
+      </article>
+    </section>
+  </main>
+
+  <div id="commandModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <form id="quickAddForm" class="stack">
+        <input id="cmdInput" class="command-input" name="text" placeholder="Type: Meeting jutro 14:00 or Meeting 2026-02-23 14:00" required />
+        <div class="two-col">
+          <span class="muted">Press Enter to add instantly</span>
+          <button type="submit" class="btn-primary">Run quick add</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div id="calendar"></div>
+  <div id="toasts" class="toasts"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script>
+    const THEME_KEY = 'pd.theme';
+    const TOKEN_KEY = 'pd.api.token';
+
+    const state = {
+      events: [],
+      editingId: null,
+    };
+
+    const toasts = document.getElementById('toasts');
+    const commandModal = document.getElementById('commandModal');
+    const cmdInput = document.getElementById('cmdInput');
+
+    function getApiToken() {
+      return localStorage.getItem(TOKEN_KEY) || 'change-me';
+    }
+
+    function apiHeaders(extra = {}) {
+      return {
+        'Content-Type': 'application/json',
+        'x-api-token': getApiToken(),
+        ...extra,
+      };
+    }
+
+    function toast(message, kind = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast ${kind}`;
+      el.textContent = message;
+      toasts.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 2600);
+    }
+
+    function fmtDate(dt) {
+      const d = new Date(dt);
+      return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function sameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    function inNextDays(date, days) {
+      const now = new Date();
+      const future = new Date();
+      future.setDate(now.getDate() + days);
+      return date >= now && date <= future;
+    }
+
+    function renderList(targetId, rows, emptyMsg) {
+      const wrap = document.getElementById(targetId);
+      wrap.innerHTML = '';
+      if (!rows.length) {
+        wrap.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'event-list';
+      rows.forEach((r) => {
+        const li = document.createElement('li');
+        li.className = 'event-item';
+        li.innerHTML = `
+          <div class="event-title">${r.title}</div>
+          <div class="event-meta">${fmtDate(r.start)}</div>
+          <div class="event-actions">
+            <button data-act="edit" data-id="${r.id}">Edit</button>
+            <button data-act="delete" data-id="${r.id}">Delete</button>
+          </div>
+        `;
+        ul.appendChild(li);
+      });
+      wrap.appendChild(ul);
+    }
+
+    async function loadEvents() {
+      const res = await fetch('/api/events');
+      if (!res.ok) throw new Error('failed loading events');
+      state.events = await res.json();
+      renderDashboardBlocks();
+      return state.events;
+    }
+
+    function renderDashboardBlocks() {
+      const now = new Date();
+      const today = state.events.filter(e => sameDay(new Date(e.start), now));
+      const upcoming = state.events.filter(e => inNextDays(new Date(e.start), 7));
+
+      renderList('todayWrap', today, 'No events today. Enjoy the focus time ✨');
+      renderList('upcomingWrap', upcoming, 'Nothing upcoming in the next 7 days.');
+    }
+
+    async function createEvent(payload) {
+      const res = await fetch('/api/events', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(payload) });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'create failed');
+      }
+      return res.json();
+    }
+
+    async function updateEvent(id, payload) {
+      const res = await fetch(`/api/events/${id}`, { method: 'PUT', headers: apiHeaders(), body: JSON.stringify(payload) });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'update failed');
+      }
+      return res.json();
+    }
+
+    async function deleteEvent(id) {
+      const res = await fetch(`/api/events/${id}`, { method: 'DELETE', headers: apiHeaders() });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'delete failed');
+      }
+      return res.json();
+    }
+
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-      initialView: 'dayGridMonth',
+      initialView: window.innerWidth < 760 ? 'listWeek' : 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek'
+      },
       height: 'auto',
-      events: async (fetchInfo, success, failure) => {
+      events: async (_fetchInfo, success, failure) => {
         try {
-          const res = await fetch('/api/events');
-          const rows = await res.json();
+          const rows = await loadEvents();
           success(rows.map(r => ({ id: String(r.id), title: r.title, start: r.start, end: r.end, allDay: r.all_day })));
         } catch (e) {
+          toast('Failed to load events', 'error');
           failure(e);
         }
       },
       eventClick: async (info) => {
-        if (confirm(`Delete event: ${info.event.title}?`)) {
-          const r = await fetch(`/api/events/${info.event.id}`, { method: 'DELETE' });
-          if (!r.ok) {
-            alert('Failed to delete event');
-            return;
+        const row = state.events.find(e => String(e.id) === info.event.id);
+        if (!row) return;
+
+        const action = prompt(`Event: ${row.title}\nType: edit or delete`, 'edit');
+        if (!action) return;
+
+        if (action.toLowerCase() === 'delete') {
+          if (!confirm(`Delete '${row.title}'?`)) return;
+          try {
+            await deleteEvent(row.id);
+            toast('Event deleted', 'success');
+            calendar.refetchEvents();
+          } catch (e) {
+            toast(e.message, 'error');
           }
-          calendar.refetchEvents();
+          return;
+        }
+
+        if (action.toLowerCase() === 'edit') {
+          const newTitle = prompt('New title', row.title);
+          if (!newTitle) return;
+          try {
+            await updateEvent(row.id, { title: newTitle });
+            toast('Event updated', 'success');
+            calendar.refetchEvents();
+          } catch (e) {
+            toast(e.message, 'error');
+          }
         }
       }
     });
-    calendar.render();
+
+    function openCommandBar() {
+      commandModal.classList.add('show');
+      commandModal.setAttribute('aria-hidden', 'false');
+      setTimeout(() => cmdInput.focus(), 10);
+    }
+
+    function closeCommandBar() {
+      commandModal.classList.remove('show');
+      commandModal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('openCmd').addEventListener('click', openCommandBar);
+
+    document.addEventListener('keydown', (e) => {
+      const activeTag = document.activeElement?.tagName;
+      const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !inInput)) {
+        e.preventDefault();
+        openCommandBar();
+      }
+      if (e.key === 'Escape') closeCommandBar();
+    });
+
+    commandModal.addEventListener('click', (e) => {
+      if (e.target === commandModal) closeCommandBar();
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const dark = document.body.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+      toast(`Theme: ${dark ? 'dark' : 'light'}`, 'info');
+    });
+
+    document.getElementById('tokenBtn').addEventListener('click', () => {
+      const next = prompt('Set PERSONAL_DASHBOARD_API_TOKEN for write calls', getApiToken());
+      if (!next) return;
+      localStorage.setItem(TOKEN_KEY, next.trim());
+      toast('API token saved in browser', 'success');
+    });
 
     document.getElementById('createForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const loading = document.getElementById('createLoading');
+      loading.style.display = 'inline-flex';
       const fd = new FormData(e.target);
       const payload = {
-        title: fd.get('title'),
+        title: String(fd.get('title') || '').trim(),
         start: new Date(fd.get('start')).toISOString(),
         end: fd.get('end') ? new Date(fd.get('end')).toISOString() : null,
-        all_day: false
+        all_day: false,
       };
-      const r = await fetch('/api/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!r.ok) {
-        alert('Failed to create event');
-        return;
+
+      try {
+        if (!payload.title) throw new Error('title is required');
+        await createEvent(payload);
+        e.target.reset();
+        toast('Event created', 'success');
+        calendar.refetchEvents();
+      } catch (err) {
+        toast(err.message || 'create failed', 'error');
+      } finally {
+        loading.style.display = 'none';
       }
-      e.target.reset();
-      calendar.refetchEvents();
     });
 
     document.getElementById('quickAddForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
-      const r = await fetch('/api/events/quick-add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: fd.get('text') })
-      });
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}));
-        alert(`Quick add failed: ${err.detail || 'unknown error'}`);
-        return;
+      const text = String(fd.get('text') || '').trim();
+      if (!text) return;
+
+      try {
+        const r = await fetch('/api/events/quick-add', {
+          method: 'POST',
+          headers: apiHeaders(),
+          body: JSON.stringify({ text }),
+        });
+
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          throw new Error(err.detail || 'quick add failed');
+        }
+
+        toast('Quick add success', 'success');
+        e.target.reset();
+        closeCommandBar();
+        calendar.refetchEvents();
+      } catch (err) {
+        toast(err.message || 'quick add failed', 'error');
       }
-      e.target.reset();
-      calendar.refetchEvents();
     });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      const act = btn.dataset.act;
+      const row = state.events.find(ev => ev.id === id);
+      if (!row) return;
+
+      if (act === 'delete') {
+        if (!confirm(`Delete '${row.title}'?`)) return;
+        try {
+          await deleteEvent(id);
+          toast('Deleted', 'success');
+          calendar.refetchEvents();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      }
+
+      if (act === 'edit') {
+        const title = prompt('Edit title', row.title);
+        if (!title) return;
+        try {
+          await updateEvent(id, { title: title.trim() });
+          toast('Updated', 'success');
+          calendar.refetchEvents();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      }
+    });
+
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'dark') document.body.classList.add('dark');
+
+    calendar.render();
   </script>
 </body>
 </html>
