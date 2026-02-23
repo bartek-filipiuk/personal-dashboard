@@ -21,9 +21,9 @@
 - [x] Smoke test from browser/health endpoint
 
 ## Phase 3 — OpenClaw Bridge
-- [ ] Add API token auth for write endpoints
-- [ ] Define OpenClaw command grammar for quick add
-- [ ] Add integration notes for custom skill/tool wrapper
+- [x] Add API token auth for write endpoints
+- [x] Define OpenClaw command grammar for quick add
+- [x] Add integration notes for custom skill/tool wrapper
 
 ## Definition of Done (MVP)
 - [ ] Event can be added via web form

@@ -15,7 +15,10 @@ Open: `http://<server-ip>:3210`
 ## Security basics
 - Keep secrets in `.env` (never commit it)
 - Use `.env.example` as template
+- Set `PERSONAL_DASHBOARD_API_TOKEN` for write endpoint auth (`X-API-Token` header)
 - Local DB/log files are gitignored
+
+Bridge notes: `docs/OPENCLAW_BRIDGE.md`
 
 ## Run (docker)
 ```bash

@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import os
 import re
+import secrets
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -30,6 +32,12 @@ class Event(Base):
 
 engine = create_engine("sqlite:///./dashboard.db", connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+WRITE_API_TOKEN = os.getenv("PERSONAL_DASHBOARD_API_TOKEN", "change-me")
+
+
+def verify_write_token(x_api_token: Optional[str] = Header(default=None)):
+    if not x_api_token or not secrets.compare_digest(x_api_token, WRITE_API_TOKEN):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing API token")
 
 
 @app.on_event("startup")
@@ -162,7 +170,11 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/events", response_model=EventOut, status_code=201)
-def create_event(payload: EventCreate, db: Session = Depends(get_db)):
+def create_event(
+    payload: EventCreate,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_write_token),
+):
     ev = Event(**payload.model_dump())
     db.add(ev)
     db.commit()
@@ -171,7 +183,12 @@ def create_event(payload: EventCreate, db: Session = Depends(get_db)):
 
 
 @app.put("/api/events/{event_id}", response_model=EventOut)
-def update_event(event_id: int, payload: EventUpdate, db: Session = Depends(get_db)):
+def update_event(
+    event_id: int,
+    payload: EventUpdate,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_write_token),
+):
     ev = db.get(Event, event_id)
     if not ev:
         raise HTTPException(status_code=404, detail="event not found")
@@ -190,7 +207,11 @@ def update_event(event_id: int, payload: EventUpdate, db: Session = Depends(get_
 
 
 @app.delete("/api/events/{event_id}")
-def delete_event(event_id: int, db: Session = Depends(get_db)):
+def delete_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_write_token),
+):
     ev = db.get(Event, event_id)
     if not ev:
         raise HTTPException(status_code=404, detail="event not found")
@@ -200,7 +221,11 @@ def delete_event(event_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/events/quick-add", response_model=EventOut, status_code=201)
-def quick_add(payload: QuickAddIn, db: Session = Depends(get_db)):
+def quick_add(
+    payload: QuickAddIn,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_write_token),
+):
     try:
         parsed = parse_quick_add(payload.text)
     except ValueError as e:
