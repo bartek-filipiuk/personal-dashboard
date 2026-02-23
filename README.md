@@ -29,3 +29,21 @@ Health:
 ```bash
 curl http://127.0.0.1:3210/health
 ```
+
+## systemd user service (auto-start)
+Service file: `deploy/systemd/personal-dashboard.service`
+
+Install as user service:
+```bash
+mkdir -p ~/.config/systemd/user
+cp deploy/systemd/personal-dashboard.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now personal-dashboard.service
+```
+
+Manage:
+```bash
+systemctl --user status personal-dashboard.service
+systemctl --user restart personal-dashboard.service
+journalctl --user -u personal-dashboard.service -n 100 --no-pager
+```

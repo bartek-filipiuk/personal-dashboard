@@ -15,7 +15,7 @@
 - [x] Basic validation + error handling
 
 ## Phase 2 — Deploy on VPS (no domain)
-- [ ] Create systemd user service
+- [x] Create systemd user service
 - [x] Run app on `0.0.0.0:3210` (Docker, restart unless-stopped)
 - [x] Add startup/restart instructions in README
 - [x] Smoke test from browser/health endpoint
@@ -26,11 +26,11 @@
 - [x] Add integration notes for custom skill/tool wrapper
 
 ## Definition of Done (MVP)
-- [ ] Event can be added via web form
-- [ ] Event can be added via text quick-add endpoint
-- [ ] Event visible in calendar and editable/deletable
-- [ ] App survives process restart (systemd)
-- [ ] README has runbook for local ops
+- [x] Event can be added via web form
+- [x] Event can be added via text quick-add endpoint
+- [x] Event visible in calendar and editable/deletable
+- [x] App survives process restart (systemd)
+- [x] README has runbook for local ops
 
 ## Suggested Night Execution Order
 1. Phase 0 remaining
