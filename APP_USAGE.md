@@ -4,6 +4,7 @@
 - URL: `http://116.203.94.11:3210`
 - Katalog projektu: `/home/vince/projects/personal-dashboard`
 - Healthcheck: `http://116.203.94.11:3210/health`
+- Baza SQLite (trwała): `/home/vince/projects/personal-dashboard/data/dashboard.db`
 
 ## Co jest teraz
 - Bootstrap aplikacji FastAPI + widok kalendarza FullCalendar

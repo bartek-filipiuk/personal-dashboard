@@ -4,4 +4,8 @@ services:
     container_name: personal-dashboard
     ports:
       - "3210:3210"
+    environment:
+      - PERSONAL_DASHBOARD_DB_PATH=/app/data/dashboard.db
+    volumes:
+      - ./data:/app/data
     restart: unless-stopped

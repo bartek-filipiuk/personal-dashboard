@@ -30,7 +30,8 @@ class Event(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 
-engine = create_engine("sqlite:///./dashboard.db", connect_args={"check_same_thread": False})
+DB_PATH = os.getenv("PERSONAL_DASHBOARD_DB_PATH", "/app/data/dashboard.db")
+engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 WRITE_API_TOKEN = os.getenv("PERSONAL_DASHBOARD_API_TOKEN", "change-me")
 
